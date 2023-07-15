@@ -9,4 +9,9 @@ export class PassengerRepositoryMemory implements IPassengerRepository {
     async getByDocument(cpf: string): Promise<Passenger | undefined> {
         return this.passengers.find((passenger) => passenger.cpf.getValeu() === cpf);
     }
+    async getByEmail(email: string): Promise<Passenger> {
+        const passenger = this.passengers.find((passenger) => passenger.email.value === email);
+        if (!passenger) throw new Error("Passenger not found.");
+        return passenger;
+    }
 }
