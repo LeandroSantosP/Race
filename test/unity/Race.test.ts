@@ -127,3 +127,24 @@ test("Deve validar se a corrida e no fim de semana", function () {
     const route = new Route(10, new Date("2021-01-10T10:00:00"));
     expect(route.isWeekend()).toBeTruthy();
 });
+
+test("Deve finalizar uma corrida retornando o total pago e o tempo dela", function () {
+    const race = Race.create(1, "123", new Date("2021-01-10T10:00:00"));
+
+    const routes_drives = [
+        {
+            distance: 20,
+            date: new Date("2021-01-01T20:00:00"),
+        },
+    ];
+
+    for (const route_drive of routes_drives) {
+        race.addRoutes(new Route(route_drive.distance, route_drive.date));
+    }
+
+    const race_in_hors = race.fishedRace(new Date("2021-01-10T12:00:00"));
+
+    expect(race_in_hors).toBe(2);
+
+    expect(race.fishedRace).toBeTruthy();
+});

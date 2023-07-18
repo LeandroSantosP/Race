@@ -1,12 +1,13 @@
+import { IMediator } from "@/infra/mediator/IMediator";
 import { IDriverRepository } from "../repository/IDriverRepository";
-import { IPassengerRepository } from "../repository/IPassengerRepository";
 import { IRaceRepository } from "../repository/IRaceRepository";
+import { DriverAcceptEvent } from "@/domain/event/DriverAcceptEvent";
 
 export class DriverAcceptUsecase {
     constructor(
         private readonly raceRepository: IRaceRepository,
         private readonly driverRepository: IDriverRepository,
-        private readonly passengerRepository: IPassengerRepository
+        private readonly mediator: IMediator
     ) {}
 
     async execute(input: Input): Promise<Output> {
@@ -15,6 +16,15 @@ export class DriverAcceptUsecase {
         race.matchDriver(driver);
         const ticket = race.getTicket();
         await this.raceRepository.update(race);
+
+        const driverAcceptEvent = new DriverAcceptEvent(
+            race.getPassenger()!.email,
+            driver.name,
+            driver.plate_car.getValue()
+        );
+
+        await this.mediator.publisher(driverAcceptEvent);
+
         return {
             ticket,
         };

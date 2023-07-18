@@ -10,6 +10,7 @@ export class Race {
     status: string;
     private passenger: Passenger | null = null;
     private driver: Driver | null = null;
+    public raceFinished: boolean = false;
 
     private constructor(readonly id: string, readonly sequence: number, readonly raceDate: Date) {
         this.routes = [];
@@ -62,6 +63,7 @@ export class Race {
         return {
             cpf: this.passenger.cpf.getValeu(),
             status: this.status,
+            email: this.passenger.email.value,
         };
     }
 
@@ -71,5 +73,12 @@ export class Race {
             cpf: this.driver.cpf.getValeu(),
             status: this.status,
         };
+    }
+
+    fishedRace(date: Date) {
+        this.raceFinished = true;
+        const diffInMilliseconds = date.getTime() - this.raceDate.getTime();
+        const diffInHours = diffInMilliseconds / (1000 * 60 * 60);
+        return diffInHours;
     }
 }
