@@ -1,8 +1,17 @@
 import { CreatePassengerUsecase } from "@/application/usecase/CreatePassengerUsecase";
+import { knex_connection } from "@/database/knex";
 import { PassengerRepositoryMemory } from "@/infra/repository/PassengerRepositoryMemory";
+import { PassengerRepositoryDatabase } from "@/infra/repository/database/PassengerRepositoryDatabase";
+import cleaner from "knex-cleaner";
+
+const passengerRepository = new PassengerRepositoryDatabase();
+
+beforeEach(async () => {
+    await cleaner.clean(knex_connection);
+});
 
 test("Deve ser possível criar um passageiro", async function () {
-    const passengerRepository = new PassengerRepositoryMemory();
+    // const passengerRepository = new PassengerRepositoryMemory();
     const createPassenger = new CreatePassengerUsecase(passengerRepository);
 
     const createPassengerInput = {
@@ -15,7 +24,11 @@ test("Deve ser possível criar um passageiro", async function () {
 
     await createPassenger.execute(createPassengerInput);
 
-    // const getPassenger = new GetPassengerUsecase();
-    // const getPassengerInput = "75704900615";
-    // const output = await getPassenger.execute(getPassengerInput);
+    const passengerCreated = await passengerRepository.getByDocument("75704900615");
+    expect(passengerCreated).toBeDefined();
+    expect(passengerCreated).toHaveProperty("id");
+});
+
+afterAll(async () => {
+    await passengerRepository.close();
 });

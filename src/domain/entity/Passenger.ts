@@ -39,4 +39,23 @@ export class Passenger extends User {
             new Cpf(cpf)
         );
     }
+
+    static recreate(
+        id: string,
+        passengerName: string,
+        email: string,
+        password: string,
+        salt: number,
+        age: number,
+        cpf: string
+    ) {
+        return new Passenger(
+            id,
+            passengerName,
+            new Email(email),
+            Password.recreate(password, salt),
+            new Age(age),
+            new Cpf(cpf)
+        );
+    }
 }

@@ -1,10 +1,18 @@
 import { CreateDriverUsecase } from "@/application/usecase/CreateDriverUsecase";
 import { GetDriverUsecase } from "@/application/usecase/GetDriverUsecase";
-import { DriverRepositoryMemory } from "@/infra/repository/DriverRepositoryMemory";
+import { knex_connection } from "@/database/knex";
+import { DriverRepositoryDatabase } from "@/infra/repository/database/DriverRepositoryDatabase";
+import { DriverRepositoryMemory } from "@/infra/repository/memory/DriverRepositoryMemory";
+import cleaner from "knex-cleaner";
+
+const driverRepository = new DriverRepositoryDatabase();
+// const driverRepository = new DriverRepositoryMemory();
+
+beforeEach(async () => {
+    await cleaner.clean(knex_connection);
+});
 
 test("Deve cadastra um motorista e obter ele.", async function () {
-    const driverRepository = new DriverRepositoryMemory();
-
     const createDriver = new CreateDriverUsecase(driverRepository);
 
     const createDriverInput = {
@@ -26,4 +34,7 @@ test("Deve cadastra um motorista e obter ele.", async function () {
     expect(output.age).toBe(20);
     expect(output.cpf).toBe("57725542809");
     expect(output.plate_car).toBe("AAA-1244");
+});
+afterAll(async () => {
+    await driverRepository.close();
 });

@@ -3,27 +3,43 @@ import { RaceAppliedHandler } from "@/application/handler/RaceAppliedHandler";
 import { DriverAcceptUsecase } from "@/application/usecase/DriverAcceptUsecase";
 import { FinishRaceUsecase } from "@/application/usecase/FinishRaceUsecase";
 import { SubmitRaceUsecase } from "@/application/usecase/SubmitRaceUsecase";
-import { Driver } from "@/domain/entity/Driver";
-import { Passenger } from "@/domain/entity/Passenger";
 import { Mediator } from "@/infra/mediator/Mediator";
-import { DriverRepositoryMemory } from "@/infra/repository/DriverRepositoryMemory";
 import { PassengerRepositoryMemory } from "@/infra/repository/PassengerRepositoryMemory";
+import { DriverRepositoryMemory } from "@/infra/repository/memory/DriverRepositoryMemory";
+
 import { RaceRepositoryMemory } from "@/infra/repository/RaceRepositoryMemory,";
 import { TransactionRepositoryMemory } from "@/infra/repository/TransactionRepositoryMemory";
 import { MailerServiceAdapterMemory } from "@/infra/services/MailerServiceAdapterMemory";
 import { StripeGatewayAdapterMemory } from "@/infra/services/StripeGatewayAdapterMemory";
+import { Driver } from "@/domain/entity/Driver";
+import { Passenger } from "@/domain/entity/Passenger";
 import { randomUUID } from "crypto";
+import { DriverRepositoryDatabase } from "@/infra/repository/database/DriverRepositoryDatabase";
+import cleaner from "knex-cleaner";
+import { knex_connection } from "@/database/knex";
+import { PassengerRepositoryDatabase } from "@/infra/repository/database/PassengerRepositoryDatabase";
+import { RaceRepositoryDatabase } from "@/infra/repository/database/RaceRepositoryDatabase";
+
+const driverRepository = new DriverRepositoryDatabase();
+const passengerRepository = new PassengerRepositoryDatabase();
+const raceRepository = new RaceRepositoryDatabase();
+
+beforeEach(async () => {
+    await cleaner.clean(knex_connection);
+});
 
 test("Deve fazer o fluxo completo de uma corrida", async function () {
-    const driverRepository = new DriverRepositoryMemory();
+    // repositories
+    // const driverRepository = new DriverRepositoryMemory();
+    // const passengerRepository = new PassengerRepositoryMemory();
+
+    const raceRepository = new RaceRepositoryMemory();
+    const transactionRepository = new TransactionRepositoryMemory();
 
     const driver = Driver.create("John Doe", 36, "24851674279", "AAA-1234");
     await driverRepository.save(driver);
 
-    const raceRepository = new RaceRepositoryMemory();
     const stripeGateway = new StripeGatewayAdapterMemory();
-    const transactionRepository = new TransactionRepositoryMemory();
-    const passengerRepository = new PassengerRepositoryMemory();
 
     const raceAppliedHandler = new RaceAppliedHandler(
         stripeGateway,
@@ -41,7 +57,7 @@ test("Deve fazer o fluxo completo de uma corrida", async function () {
     mediator.register(raceAppliedHandler);
     mediator.register(driverAcceptHandler);
 
-    const passenger = await Passenger.create("Michael Doe", "michael.doe@gmail.com", "senha123", 20, "75704900615");
+    const passenger = await Passenger.create("João Doe", "joao.doe@gmail.com", "senha123", 20, "75704900615");
     await passengerRepository.save(passenger);
 
     const submitRace = new SubmitRaceUsecase(raceRepository, passengerRepository, mediator);
@@ -64,7 +80,7 @@ test("Deve fazer o fluxo completo de uma corrida", async function () {
     await submitRace.execute(SubmitRaceInput);
 
     expect(transactionRepository.transactions[0].status).toBe("approved");
-    expect(transactionRepository.transactions[0].userEmail.value).toBe("michael.doe@gmail.com");
+    expect(transactionRepository.transactions[0].userEmail.value).toBe("joao.doe@gmail.com");
     expect(raceRepository.races[0].getPassenger()).not.toBeNull();
 
     const driverAccept = new DriverAcceptUsecase(raceRepository, driverRepository, mediator);
@@ -105,4 +121,9 @@ test("Deve fazer o fluxo completo de uma corrida", async function () {
     expect(finishRaceOutput.totalPrice).toBe(56);
     expect(finishRaceOutput.race_time).toBeDefined();
     expect(raceRepository.races[0].raceFinished).toBeTruthy();
+});
+
+afterAll(async () => {
+    await passengerRepository.close();
+    await driverRepository.close();
 });

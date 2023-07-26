@@ -16,6 +16,10 @@ export class Password {
         return new Password(passwordHashed, generateSalt);
     }
 
+    static recreate(password: string, salt: number) {
+        return new Password(password, salt);
+    }
+
     async verify(PlainPassword: string): Promise<boolean> {
         return compare(PlainPassword, this.value);
     }

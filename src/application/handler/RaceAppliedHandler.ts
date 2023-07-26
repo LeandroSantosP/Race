@@ -5,7 +5,6 @@ import { IGatewayPayment } from "../service/IGatewayPayment";
 import { RaceAppliedEvent } from "@/domain/event/RaceAppliedEvent";
 import { Transaction } from "@/domain/entity/Transaction";
 import { IPassengerRepository } from "../repository/IPassengerRepository";
-import { endEvent } from "react-native/Libraries/Performance/Systrace";
 
 export class RaceAppliedHandler implements IHandler {
     eventName = "RaceApplied";

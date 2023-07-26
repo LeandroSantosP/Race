@@ -14,4 +14,6 @@ export class PassengerRepositoryMemory implements IPassengerRepository {
         if (!passenger) throw new Error("Passenger not found.");
         return passenger;
     }
+
+    async close(): Promise<void> {}
 }

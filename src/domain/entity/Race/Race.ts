@@ -22,6 +22,10 @@ export class Race {
         return new Race(id, sequence, raceDate);
     }
 
+    static recreate(sequence: number, id: string = randomUUID(), raceDate: Date = new Date()): Race {
+        return new Race(id, sequence, raceDate);
+    }
+
     addRoutes(route: Route) {
         this.routes.push(route);
     }

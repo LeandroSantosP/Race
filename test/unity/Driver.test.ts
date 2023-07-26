@@ -2,6 +2,7 @@ import { Driver } from "@/domain/entity/Driver";
 
 test("Deve criar um motorista", function () {
     const driver = Driver.create("John Doe", 20, "57725542809", "BBB-2324", "12345");
+
     expect(driver).toBeDefined();
 });
 

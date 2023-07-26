@@ -12,4 +12,8 @@ export class Driver extends User {
     static create(driverName: string, age: number, cpf: string, plate_car: string, id: string = randomUUID()) {
         return new Driver(id, driverName, new Age(age), new Cpf(cpf), new Plate(plate_car));
     }
+
+    static recreate(driverName: string, age: number, cpf: string, plate_car: string, id: string = randomUUID()) {
+        return new Driver(id, driverName, new Age(age), new Cpf(cpf), new Plate(plate_car));
+    }
 }
