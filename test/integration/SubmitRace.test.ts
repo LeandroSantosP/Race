@@ -19,9 +19,12 @@ import cleaner from "knex-cleaner";
 import { knex_connection } from "@/database/knex";
 import { PassengerRepositoryDatabase } from "@/infra/repository/database/PassengerRepositoryDatabase";
 import { RaceRepositoryDatabase } from "@/infra/repository/database/RaceRepositoryDatabase";
+import { RoutesRepositoryDatabase } from "@/infra/repository/database/RouteRepositoryDatabase";
+import { RoutesRepositoryMemory } from "@/infra/repository/memory/RoutesRepositoryMemory";
 
 const driverRepository = new DriverRepositoryDatabase();
 const passengerRepository = new PassengerRepositoryDatabase();
+const routeRepository = new RoutesRepositoryDatabase();
 const raceRepository = new RaceRepositoryDatabase();
 
 beforeEach(async () => {
@@ -33,6 +36,7 @@ test("Deve fazer o fluxo completo de uma corrida", async function () {
     // const driverRepository = new DriverRepositoryMemory();
     // const passengerRepository = new PassengerRepositoryMemory();
 
+    const routeRepository = new RoutesRepositoryMemory();
     const raceRepository = new RaceRepositoryMemory();
     const transactionRepository = new TransactionRepositoryMemory();
 
@@ -60,7 +64,7 @@ test("Deve fazer o fluxo completo de uma corrida", async function () {
     const passenger = await Passenger.create("João Doe", "joao.doe@gmail.com", "senha123", 20, "75704900615");
     await passengerRepository.save(passenger);
 
-    const submitRace = new SubmitRaceUsecase(raceRepository, passengerRepository, mediator);
+    const submitRace = new SubmitRaceUsecase(raceRepository, passengerRepository, routeRepository, mediator);
 
     const SubmitRaceInput = {
         passenger_cpf: "75704900615",

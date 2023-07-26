@@ -2,16 +2,18 @@ import { Transaction } from "@/domain/entity/Transaction";
 import { IGatewayPayment } from "../service/IGatewayPayment";
 import { IPassengerRepository } from "../repository/IPassengerRepository";
 import { IRaceRepository } from "../repository/IRaceRepository";
-import { ITransactionRepository } from "../repository/ITransactionRepository";
 import { Race } from "@/domain/entity/Race/Race";
 import { Route } from "@/domain/entity/Race/Route";
 import { IMediator } from "@/infra/mediator/IMediator";
 import { RaceAppliedEvent } from "@/domain/event/RaceAppliedEvent";
+import { CalculateRacePrice } from "@/domain/services/CalculateRacePrice";
+import { IRoutesRepository } from "../repository/IRoutesRepository";
 
 export class SubmitRaceUsecase {
     constructor(
         private readonly raceRepository: IRaceRepository,
         private readonly passengerRepository: IPassengerRepository,
+        private readonly routesRepository: IRoutesRepository,
         private readonly mediator: IMediator
     ) {}
 
@@ -22,9 +24,18 @@ export class SubmitRaceUsecase {
 
         const race = Race.create(sequence);
 
-        for (const route of input.routes_drives) {
-            race.addRoutes(new Route(route.distance, route.date));
-        }
+        const calculateRacePrice = new CalculateRacePrice();
+
+        const routes = await Promise.all(
+            input.routes_drives.map(async (routeData) => {
+                const route = new Route(routeData.distance, routeData.date, race.id);
+                await this.routesRepository.save(route);
+                return route;
+            })
+        );
+
+        const price = calculateRacePrice.calculate(routes);
+        race.setPrice(price);
 
         await this.raceRepository.save(race);
 

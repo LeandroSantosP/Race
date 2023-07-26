@@ -5,15 +5,14 @@ import { Passenger } from "../Passenger";
 import { Driver } from "../Driver";
 
 export class Race {
-    routes: Route[];
     ticket: Ticket;
     status: string;
     private passenger: Passenger | null = null;
     private driver: Driver | null = null;
     public raceFinished: boolean = false;
+    private race_price: null | number = null;
 
     private constructor(readonly id: string, readonly sequence: number, readonly raceDate: Date) {
-        this.routes = [];
         this.status = "waiting";
         this.ticket = new Ticket(raceDate, sequence);
     }
@@ -24,22 +23,6 @@ export class Race {
 
     static recreate(sequence: number, id: string = randomUUID(), raceDate: Date = new Date()): Race {
         return new Race(id, sequence, raceDate);
-    }
-
-    addRoutes(route: Route) {
-        this.routes.push(route);
-    }
-
-    getPrice() {
-        const price = this.routes.reduce((acc, route) => {
-            return (acc += route.calculate());
-        }, 0);
-
-        if (price <= 15) {
-            return 15;
-        }
-
-        return price;
     }
 
     getTicket(): string {
@@ -54,12 +37,21 @@ export class Race {
         }
     }
 
+    getPrice(): number {
+        if (!this.race_price) throw new Error("Price not found");
+        return this.race_price;
+    }
+
     matchPassenger(matchPassenger: Passenger) {
         this.passenger = matchPassenger;
     }
 
     matchDriver(matchDriverInput: Driver) {
         this.driver = matchDriverInput;
+    }
+
+    setPrice(price: number) {
+        this.race_price = price;
     }
 
     getPassenger() {

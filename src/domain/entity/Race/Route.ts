@@ -1,9 +1,11 @@
+import { randomUUID } from "crypto";
+
 export class Route {
     NORMAL_TAX = 1.4;
     OVERNIGHT_TAX = 5;
     WEEKEND_TAX = 2.4;
     MIN_PRICE = 10;
-    constructor(readonly distance: number, readonly date: Date) {}
+    constructor(readonly distance: number, readonly date: Date, readonly race_id: string = randomUUID()) {}
 
     isWeekend(): boolean {
         const weekDay = this.date.getDay();

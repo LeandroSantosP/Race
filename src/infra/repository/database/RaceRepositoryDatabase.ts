@@ -70,17 +70,6 @@ export class RaceRepositoryDatabase implements IRaceRepository {
             driver_id,
             passenger_id,
         });
-
-        await Promise.all(
-            race.routes.map(async (route) => {
-                await this.connection("route").insert({
-                    id: randomUUID(),
-                    distance: route.distance,
-                    created_at: route.date,
-                    race_id: race.id,
-                });
-            })
-        );
     }
 
     async get(id: string): Promise<Race> {
@@ -118,11 +107,6 @@ export class RaceRepositoryDatabase implements IRaceRepository {
         }
         race.setStatus(raceData.status);
         race.raceFinished = raceData.raceFinished;
-        const race_routes = await this.connection("route").where({ id: raceData.route_id });
-
-        for (const route of race_routes) {
-            race.addRoutes(new Route(route.distance, route.create_at));
-        }
 
         return race;
     }
