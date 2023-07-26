@@ -4,6 +4,8 @@ import { DriverAcceptUsecase } from "@/application/usecase/DriverAcceptUsecase";
 import { FinishRaceUsecase } from "@/application/usecase/FinishRaceUsecase";
 import { SubmitRaceUsecase } from "@/application/usecase/SubmitRaceUsecase";
 import { Mediator } from "@/infra/mediator/Mediator";
+import cleaner from "knex-cleaner";
+
 import { PassengerRepositoryMemory } from "@/infra/repository/PassengerRepositoryMemory";
 import { DriverRepositoryMemory } from "@/infra/repository/memory/DriverRepositoryMemory";
 
@@ -15,7 +17,6 @@ import { Driver } from "@/domain/entity/Driver";
 import { Passenger } from "@/domain/entity/Passenger";
 import { randomUUID } from "crypto";
 import { DriverRepositoryDatabase } from "@/infra/repository/database/DriverRepositoryDatabase";
-import cleaner from "knex-cleaner";
 import { knex_connection } from "@/database/knex";
 import { PassengerRepositoryDatabase } from "@/infra/repository/database/PassengerRepositoryDatabase";
 import { RaceRepositoryDatabase } from "@/infra/repository/database/RaceRepositoryDatabase";
@@ -32,19 +33,19 @@ beforeEach(async () => {
 });
 
 test("Deve fazer o fluxo completo de uma corrida", async function () {
-    // repositories
+    // repositories and services
     // const driverRepository = new DriverRepositoryMemory();
     // const passengerRepository = new PassengerRepositoryMemory();
 
     const routeRepository = new RoutesRepositoryMemory();
     const raceRepository = new RaceRepositoryMemory();
     const transactionRepository = new TransactionRepositoryMemory();
-
-    const driver = Driver.create("John Doe", 36, "24851674279", "AAA-1234");
-    await driverRepository.save(driver);
-
     const stripeGateway = new StripeGatewayAdapterMemory();
 
+    const mailer = new MailerServiceAdapterMemory();
+
+    // event handlers
+    const driverAcceptHandler = new DriverAcceptHandler(mailer);
     const raceAppliedHandler = new RaceAppliedHandler(
         stripeGateway,
         transactionRepository,
@@ -52,16 +53,15 @@ test("Deve fazer o fluxo completo de uma corrida", async function () {
         passengerRepository
     );
 
-    const mailer = new MailerServiceAdapterMemory();
-
-    const driverAcceptHandler = new DriverAcceptHandler(mailer);
-
     const mediator = new Mediator();
 
     mediator.register(raceAppliedHandler);
     mediator.register(driverAcceptHandler);
 
-    const passenger = await Passenger.create("João Doe", "joao.doe@gmail.com", "senha123", 20, "75704900615");
+    const driver = Driver.create("John Doe", 36, "24851674279", "AAA-1234");
+    await driverRepository.save(driver);
+
+    const passenger = await Passenger.create("Maria Doe", "maria.doe@gmail.com", "senha123", 20, "75704900615");
     await passengerRepository.save(passenger);
 
     const submitRace = new SubmitRaceUsecase(raceRepository, passengerRepository, routeRepository, mediator);
@@ -84,7 +84,7 @@ test("Deve fazer o fluxo completo de uma corrida", async function () {
     await submitRace.execute(SubmitRaceInput);
 
     expect(transactionRepository.transactions[0].status).toBe("approved");
-    expect(transactionRepository.transactions[0].userEmail.value).toBe("joao.doe@gmail.com");
+    expect(transactionRepository.transactions[0].userEmail.value).toBe("maria.doe@gmail.com");
     expect(raceRepository.races[0].getPassenger()).not.toBeNull();
 
     const driverAccept = new DriverAcceptUsecase(raceRepository, driverRepository, mediator);
