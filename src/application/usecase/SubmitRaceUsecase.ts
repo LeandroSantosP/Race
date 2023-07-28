@@ -24,6 +24,10 @@ export class SubmitRaceUsecase {
 
         const race = Race.create(sequence);
 
+        race.setPrice(0);
+
+        await this.raceRepository.save(race);
+
         const calculateRacePrice = new CalculateRacePrice();
 
         const routes = await Promise.all(
@@ -36,8 +40,7 @@ export class SubmitRaceUsecase {
 
         const price = calculateRacePrice.calculate(routes);
         race.setPrice(price);
-
-        await this.raceRepository.save(race);
+        await this.raceRepository.update(race);
 
         const raceAppliedEvent = new RaceAppliedEvent(
             race.id,

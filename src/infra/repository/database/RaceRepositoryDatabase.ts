@@ -3,8 +3,6 @@ import { knex_connection } from "@/database/knex";
 import { Driver } from "@/domain/entity/Driver";
 import { Passenger } from "@/domain/entity/Passenger";
 import { Race } from "@/domain/entity/Race/Race";
-import { Route } from "@/domain/entity/Race/Route";
-import { randomUUID } from "crypto";
 import { Knex } from "knex";
 
 export class RaceRepositoryDatabase implements IRaceRepository {
@@ -51,15 +49,8 @@ export class RaceRepositoryDatabase implements IRaceRepository {
     }
 
     async save(race: Race): Promise<void> {
-        let passenger_id: null | string = null;
-        let driver_id: null | string = null;
+        const { driver_id, passenger_id } = await this.getPassengerAndDriverIds(race);
 
-        const [driverData, passengerData] = await this.getDriverAndPassenger(
-            race.getPassenger()?.cpf,
-            race.getDriver()?.cpf
-        );
-        passenger_id = passengerData?.id ?? null;
-        driver_id = driverData?.id ?? null;
         await this.connection("race").insert({
             id: race.id,
             sequence: race.sequence,
@@ -69,13 +60,15 @@ export class RaceRepositoryDatabase implements IRaceRepository {
             raceFinished: race.raceFinished,
             driver_id,
             passenger_id,
+            price: race.getPrice(),
         });
     }
 
     async get(id: string): Promise<Race> {
         const [raceData] = await this.connection("race").where({ id });
         if (!raceData) throw new Error("Race not found");
-        const race = Race.recreate(raceData.sequence, raceData.id, raceData.raceDate);
+
+        const race = Race.recreate(raceData.sequence, parseFloat(raceData.price), raceData.id, raceData.raceDate);
         if (raceData.passenger_id) {
             const [passengerData] = await this.connection("passenger").where({ id: raceData.passenger_id });
             if (!passengerData) throw new Error("Passenger not found");
@@ -93,7 +86,7 @@ export class RaceRepositoryDatabase implements IRaceRepository {
         }
 
         if (raceData.driver_id) {
-            const [driverData] = await this.connection("driver").where({ id: raceData.passenger_id });
+            const [driverData] = await this.connection("driver").where({ id: raceData.driver_id });
             if (!driverData) throw new Error("Driver not found");
             race.matchDriver(
                 Driver.recreate(
@@ -113,16 +106,35 @@ export class RaceRepositoryDatabase implements IRaceRepository {
 
     async getSequence(): Promise<number> {
         const countResult: Array<{ count: number }> = await this.connection("race").count();
-        return countResult[0].count;
+        return countResult[0].count + 1;
+    }
+    private async getPassengerAndDriverIds(race: Race) {
+        let passenger_id: null | string = null;
+        let driver_id: null | string = null;
+
+        const [driverData, passengerData] = await this.getDriverAndPassenger(
+            race.getPassenger()?.cpf,
+            race.getDriver()?.cpf
+        );
+        passenger_id = passengerData?.id ?? null;
+        driver_id = driverData?.id ?? null;
+
+        return {
+            passenger_id,
+            driver_id,
+        };
     }
 
     async update(race: Race): Promise<void> {
-        await this.connection("race")
-            .update({
-                sequence: race.sequence,
-                raceDate: race.raceDate,
-            })
-            .where({ id: race.id });
+        const { driver_id, passenger_id } = await this.getPassengerAndDriverIds(race);
+        await this.connection("race").update({
+            driver_id,
+            passenger_id,
+            status: race.status,
+            raceFinished: race.raceFinished,
+            price: race.getPrice(),
+            ticket: race.getTicket(),
+        });
     }
 
     async close(): Promise<void> {

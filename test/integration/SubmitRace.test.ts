@@ -8,8 +8,9 @@ import cleaner from "knex-cleaner";
 
 import { PassengerRepositoryMemory } from "@/infra/repository/PassengerRepositoryMemory";
 import { DriverRepositoryMemory } from "@/infra/repository/memory/DriverRepositoryMemory";
-
 import { RaceRepositoryMemory } from "@/infra/repository/RaceRepositoryMemory,";
+import { RoutesRepositoryMemory } from "@/infra/repository/memory/RoutesRepositoryMemory";
+
 import { TransactionRepositoryMemory } from "@/infra/repository/TransactionRepositoryMemory";
 import { MailerServiceAdapterMemory } from "@/infra/services/MailerServiceAdapterMemory";
 import { StripeGatewayAdapterMemory } from "@/infra/services/StripeGatewayAdapterMemory";
@@ -21,7 +22,6 @@ import { knex_connection } from "@/database/knex";
 import { PassengerRepositoryDatabase } from "@/infra/repository/database/PassengerRepositoryDatabase";
 import { RaceRepositoryDatabase } from "@/infra/repository/database/RaceRepositoryDatabase";
 import { RoutesRepositoryDatabase } from "@/infra/repository/database/RouteRepositoryDatabase";
-import { RoutesRepositoryMemory } from "@/infra/repository/memory/RoutesRepositoryMemory";
 
 const driverRepository = new DriverRepositoryDatabase();
 const passengerRepository = new PassengerRepositoryDatabase();
@@ -32,13 +32,14 @@ beforeEach(async () => {
     await cleaner.clean(knex_connection);
 });
 
+// is require execute this test alone
+
 test("Deve fazer o fluxo completo de uma corrida", async function () {
     // repositories and services
     // const driverRepository = new DriverRepositoryMemory();
     // const passengerRepository = new PassengerRepositoryMemory();
-
-    const routeRepository = new RoutesRepositoryMemory();
-    const raceRepository = new RaceRepositoryMemory();
+    // const routeRepository = new RoutesRepositoryMemory();
+    // const raceRepository = new RaceRepositoryMemory();
     const transactionRepository = new TransactionRepositoryMemory();
     const stripeGateway = new StripeGatewayAdapterMemory();
 
@@ -61,7 +62,7 @@ test("Deve fazer o fluxo completo de uma corrida", async function () {
     const driver = Driver.create("John Doe", 36, "24851674279", "AAA-1234");
     await driverRepository.save(driver);
 
-    const passenger = await Passenger.create("Maria Doe", "maria.doe@gmail.com", "senha123", 20, "75704900615");
+    const passenger = await Passenger.create("Matheus Doe", "matheus.doe@gmail.com", "senha123", 20, "75704900615");
     await passengerRepository.save(passenger);
 
     const submitRace = new SubmitRaceUsecase(raceRepository, passengerRepository, routeRepository, mediator);
@@ -84,11 +85,13 @@ test("Deve fazer o fluxo completo de uma corrida", async function () {
     await submitRace.execute(SubmitRaceInput);
 
     expect(transactionRepository.transactions[0].status).toBe("approved");
-    expect(transactionRepository.transactions[0].userEmail.value).toBe("maria.doe@gmail.com");
-    expect(raceRepository.races[0].getPassenger()).not.toBeNull();
+    expect(transactionRepository.transactions[0].userEmail.value).toBe("matheus.doe@gmail.com");
+
+    const [race] = await knex_connection("race").select("*");
+    const race_id = race.id;
+    // const race_id = raceRepository.races[0].id;
 
     const driverAccept = new DriverAcceptUsecase(raceRepository, driverRepository, mediator);
-    const race_id = raceRepository.races[0].id;
 
     const driverAcceptInput = {
         race_id,
@@ -98,8 +101,10 @@ test("Deve fazer o fluxo completo de uma corrida", async function () {
     // Driver accept the race
     const output = await driverAccept.execute(driverAcceptInput);
 
+    const driver_update = await raceRepository.get(race_id);
+
     expect(output.ticket).toBe("2023000001");
-    expect(raceRepository.races[0].getDriver()).toBeTruthy();
+    expect(driver_update.getDriver()).toBeTruthy();
 
     expect(mailer.messages).toEqual(
         expect.arrayContaining([
@@ -109,7 +114,6 @@ test("Deve fazer o fluxo completo de uma corrida", async function () {
             }),
         ])
     );
-
     // should finish a race
 
     const finishRace = new FinishRaceUsecase(raceRepository);
@@ -119,15 +123,20 @@ test("Deve fazer o fluxo completo de uma corrida", async function () {
         date: new Date("2024-01-01"),
     };
 
-    expect(raceRepository.races[0].raceFinished).toBeFalsy();
+    const currentRaceBefore = await raceRepository.get(race_id);
+    expect(currentRaceBefore.raceFinished).toBeFalsy();
+
     const finishRaceOutput = await finishRace.execute(finishRaceInput);
+    const currentRaceAfter = await raceRepository.get(race_id);
 
     expect(finishRaceOutput.totalPrice).toBe(56);
     expect(finishRaceOutput.race_time).toBeDefined();
-    expect(raceRepository.races[0].raceFinished).toBeTruthy();
+    expect(currentRaceAfter.raceFinished).toBeTruthy();
 });
 
 afterAll(async () => {
     await passengerRepository.close();
     await driverRepository.close();
+    await raceRepository.close();
+    await routeRepository.close();
 });

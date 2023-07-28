@@ -8,6 +8,7 @@ export class FinishRaceUsecase {
 
         const race_time = race.fishedRace(input.date);
         const totalPrice = race.getPrice();
+
         await this.raceRepository.update(race);
         return {
             totalPrice,

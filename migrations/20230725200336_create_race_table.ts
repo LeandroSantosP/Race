@@ -5,6 +5,7 @@ export async function up(knex: Knex): Promise<void> {
         table.uuid("id").primary();
         table.integer("sequence").notNullable();
         table.string("ticket").unique().notNullable();
+        table.decimal("price").notNullable();
         table.string("status").notNullable();
         table.boolean("raceFinished").notNullable();
         table.timestamp("raceDate").notNullable();

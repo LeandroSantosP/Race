@@ -21,8 +21,11 @@ export class Race {
         return new Race(id, sequence, raceDate);
     }
 
-    static recreate(sequence: number, id: string = randomUUID(), raceDate: Date = new Date()): Race {
-        return new Race(id, sequence, raceDate);
+    static recreate(sequence: number, price: number, id: string = randomUUID(), raceDate: Date = new Date()): Race {
+        const race = new Race(id, sequence, raceDate);
+
+        race.setPrice(price);
+        return race;
     }
 
     getTicket(): string {
@@ -38,7 +41,7 @@ export class Race {
     }
 
     getPrice(): number {
-        if (!this.race_price) throw new Error("Price not found");
+        if (!this.race_price && this.race_price !== 0) throw new Error("Price not found");
         return this.race_price;
     }
 
