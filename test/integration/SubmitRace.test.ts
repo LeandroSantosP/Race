@@ -31,9 +31,7 @@ const raceRepository = new RaceRepositoryDatabase();
 beforeEach(async () => {
     await cleaner.clean(knex_connection);
 });
-
 // is require execute this test alone
-
 test("Deve fazer o fluxo completo de uma corrida", async function () {
     // repositories and services
     // const driverRepository = new DriverRepositoryMemory();

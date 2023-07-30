@@ -43,5 +43,3 @@ export class RaceAppliedHandler implements IHandler {
         await this.raceRepository.update(race);
     }
 }
-
-type Input = {};
