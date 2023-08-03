@@ -3,7 +3,7 @@
 /node_modules
 /coverage
 /db_backup
-
+/cache
 # Logs
 logs
 *.log

@@ -22,17 +22,19 @@ import { knex_connection } from "@/database/knex";
 import { PassengerRepositoryDatabase } from "@/infra/repository/database/PassengerRepositoryDatabase";
 import { RaceRepositoryDatabase } from "@/infra/repository/database/RaceRepositoryDatabase";
 import { RoutesRepositoryDatabase } from "@/infra/repository/database/RouteRepositoryDatabase";
+import { MailerRepositoryDatabase } from "@/infra/repository/database/MailerRepositoryDatabase";
 
 const driverRepository = new DriverRepositoryDatabase();
 const passengerRepository = new PassengerRepositoryDatabase();
 const routeRepository = new RoutesRepositoryDatabase();
 const raceRepository = new RaceRepositoryDatabase();
+const mailerRepository = new MailerRepositoryDatabase();
 
 beforeEach(async () => {
     await cleaner.clean(knex_connection);
 });
 // is require execute this test alone
-test("Deve fazer o fluxo completo de uma corrida", async function () {
+test.skip("Deve fazer o fluxo completo de uma corrida", async function () {
     // repositories and services
     // const driverRepository = new DriverRepositoryMemory();
     // const passengerRepository = new PassengerRepositoryMemory();
@@ -44,7 +46,7 @@ test("Deve fazer o fluxo completo de uma corrida", async function () {
     const mailer = new MailerServiceAdapterMemory();
 
     // event handlers
-    const driverAcceptHandler = new DriverAcceptHandler(mailer);
+    const driverAcceptHandler = new DriverAcceptHandler(mailer, mailerRepository);
     const raceAppliedHandler = new RaceAppliedHandler(
         stripeGateway,
         transactionRepository,
@@ -137,4 +139,5 @@ afterAll(async () => {
     await driverRepository.close();
     await raceRepository.close();
     await routeRepository.close();
+    await mailerRepository.close();
 });

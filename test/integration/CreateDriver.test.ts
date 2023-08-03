@@ -2,7 +2,6 @@ import { CreateDriverUsecase } from "@/application/usecase/CreateDriverUsecase";
 import { GetDriverUsecase } from "@/application/usecase/GetDriverUsecase";
 import { knex_connection } from "@/database/knex";
 import { DriverRepositoryDatabase } from "@/infra/repository/database/DriverRepositoryDatabase";
-import { DriverRepositoryMemory } from "@/infra/repository/memory/DriverRepositoryMemory";
 import cleaner from "knex-cleaner";
 
 const driverRepository = new DriverRepositoryDatabase();
@@ -35,6 +34,7 @@ test("Deve cadastra um motorista e obter ele.", async function () {
     expect(output.cpf).toBe("57725542809");
     expect(output.plate_car).toBe("AAA-1244");
 });
+
 afterAll(async () => {
     await driverRepository.close();
 });

@@ -1,4 +1,6 @@
-export type message = { from: string; to: string; message: string };
+import { Message } from "@/domain/entity/Message";
+
 export interface IMailerRepository {
-    save(message: message): Promise<void>;
+    save(message: Message): Promise<void>;
+    get(id: string): Promise<Message>;
 }

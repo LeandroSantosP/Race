@@ -1,5 +1,3 @@
-import { Transaction } from "@/domain/entity/Transaction";
-import { IGatewayPayment } from "../service/IGatewayPayment";
 import { IPassengerRepository } from "../repository/IPassengerRepository";
 import { IRaceRepository } from "../repository/IRaceRepository";
 import { Race } from "@/domain/entity/Race/Race";
@@ -60,10 +58,4 @@ type Input = {
         distance: number;
         date: Date;
     }>;
-};
-
-type Output = {
-    passengerName: string;
-    ticket: string;
-    status: string;
 };
