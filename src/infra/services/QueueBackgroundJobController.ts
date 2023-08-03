@@ -19,7 +19,7 @@ export class QueueBackgroundJobController implements IQueueBackgroundJobControll
         return this.instance;
     }
 
-    async add(name: string, data: any) {
+    async publishOnQueue(name: string, data: any) {
         const job = this.jobs.find((job) => job.name === name);
         if (!job) throw new Error("Job not found");
         const Queue = this.queue.createQueue(job.name);

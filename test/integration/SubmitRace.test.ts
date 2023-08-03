@@ -42,7 +42,6 @@ test.skip("Deve fazer o fluxo completo de uma corrida", async function () {
     // const raceRepository = new RaceRepositoryMemory();
     const transactionRepository = new TransactionRepositoryMemory();
     const stripeGateway = new StripeGatewayAdapterMemory();
-
     const mailer = new MailerServiceAdapterMemory();
 
     // event handlers

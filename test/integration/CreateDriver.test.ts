@@ -5,7 +5,6 @@ import { DriverRepositoryDatabase } from "@/infra/repository/database/DriverRepo
 import cleaner from "knex-cleaner";
 
 const driverRepository = new DriverRepositoryDatabase();
-// const driverRepository = new DriverRepositoryMemory();
 
 beforeEach(async () => {
     await cleaner.clean(knex_connection);

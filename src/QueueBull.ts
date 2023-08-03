@@ -16,5 +16,5 @@ const bullmqAdapter = new BullMqAdapter(connection);
 const queueBackgroundJob = QueueBackgroundJobController.getInstance(connection, bullmqAdapter);
 
 queueBackgroundJob.jobs.push(new JobLogTesting());
-queueBackgroundJob.add("LogJob", { test: "test" });
+queueBackgroundJob.publishOnQueue("LogJob", { test: "leandro" });
 queueBackgroundJob.process();

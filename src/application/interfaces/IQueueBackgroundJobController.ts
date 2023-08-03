@@ -1,7 +1,7 @@
-import { Job } from "@/domain/entity/Job";
+import { Job } from "./Job";
 
 export interface IQueueBackgroundJobController {
     jobs: Array<Job>;
-    add(name: string, data: any): Promise<any>;
+    publishOnQueue(name: string, data: any): Promise<any>;
     process(): any;
 }

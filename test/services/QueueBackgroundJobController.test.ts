@@ -16,7 +16,7 @@ const queueBackgroundJob = QueueBackgroundJobController.getInstance(connection, 
 test("Deve ser possível criar uma Fila de jobs.", async function () {
     queueBackgroundJob.jobs.push(new JobLogTesting());
 
-    await queueBackgroundJob.add("LogJob", { test: "test" });
+    await queueBackgroundJob.publishOnQueue("LogJob", { test: "test" });
     queueBackgroundJob.process();
 });
 

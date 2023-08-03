@@ -66,6 +66,7 @@ export class RaceRepositoryDatabase implements IRaceRepository {
 
     async get(id: string): Promise<Race> {
         const [raceData] = await this.connection("race").where({ id });
+
         if (!raceData) throw new Error("Race not found");
 
         const race = Race.recreate(raceData.sequence, parseFloat(raceData.price), raceData.id, raceData.raceDate);
