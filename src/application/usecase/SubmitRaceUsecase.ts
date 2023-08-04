@@ -17,6 +17,7 @@ export class SubmitRaceUsecase {
 
     async execute(input: Input): Promise<void> {
         const passenger = await this.passengerRepository.getByDocument(input.passenger_cpf);
+
         if (!passenger) throw new Error("Passenger not found");
         const sequence = await this.raceRepository.getSequence();
 
@@ -30,7 +31,7 @@ export class SubmitRaceUsecase {
 
         const routes = await Promise.all(
             input.routes_drives.map(async (routeData) => {
-                const route = new Route(routeData.distance, routeData.date, race.id);
+                const route = new Route(routeData.distance, new Date(routeData.date), race.id);
                 await this.routesRepository.save(route);
                 return route;
             })

@@ -5,6 +5,8 @@ import { FinishRaceUsecase } from "@/application/usecase/FinishRaceUsecase";
 import { SubmitRaceUsecase } from "@/application/usecase/SubmitRaceUsecase";
 import { Mediator } from "@/infra/mediator/Mediator";
 import cleaner from "knex-cleaner";
+import IORedis from "ioredis";
+import { randomUUID } from "crypto";
 
 import { PassengerRepositoryMemory } from "@/infra/repository/PassengerRepositoryMemory";
 import { DriverRepositoryMemory } from "@/infra/repository/memory/DriverRepositoryMemory";
@@ -16,13 +18,18 @@ import { MailerServiceAdapterMemory } from "@/infra/services/MailerServiceAdapte
 import { StripeGatewayAdapterMemory } from "@/infra/services/StripeGatewayAdapterMemory";
 import { Driver } from "@/domain/entity/Driver";
 import { Passenger } from "@/domain/entity/Passenger";
-import { randomUUID } from "crypto";
+
 import { DriverRepositoryDatabase } from "@/infra/repository/database/DriverRepositoryDatabase";
 import { knex_connection } from "@/database/knex";
 import { PassengerRepositoryDatabase } from "@/infra/repository/database/PassengerRepositoryDatabase";
 import { RaceRepositoryDatabase } from "@/infra/repository/database/RaceRepositoryDatabase";
 import { RoutesRepositoryDatabase } from "@/infra/repository/database/RouteRepositoryDatabase";
 import { MailerRepositoryDatabase } from "@/infra/repository/database/MailerRepositoryDatabase";
+import { MailerJobAdapterNodeMailer } from "@/infra/jobs";
+
+import { QueueBackgroundJobController } from "@/infra/services/QueueBackgroundJobController";
+import RedisConfig from "@/config/RedisConfig";
+import { BullMqAdapter } from "@/infra/services/BullMqAdapter";
 
 const driverRepository = new DriverRepositoryDatabase();
 const passengerRepository = new PassengerRepositoryDatabase();
@@ -30,11 +37,22 @@ const routeRepository = new RoutesRepositoryDatabase();
 const raceRepository = new RaceRepositoryDatabase();
 const mailerRepository = new MailerRepositoryDatabase();
 
+const RedisConnection = new IORedis(RedisConfig.port, RedisConfig.host!, {
+    password: RedisConfig.password,
+    enableReadyCheck: false,
+    maxRetriesPerRequest: null,
+});
+
+const bullmqAdapter = new BullMqAdapter(RedisConnection);
+const jobController = QueueBackgroundJobController.getInstance(RedisConnection, bullmqAdapter);
+jobController.jobs.push(new MailerJobAdapterNodeMailer());
+
 beforeEach(async () => {
     await cleaner.clean(knex_connection);
 });
+
 // is require execute this test alone
-test.skip("Deve fazer o fluxo completo de uma corrida", async function () {
+test("Deve fazer o fluxo completo de uma corrida", async function () {
     // repositories and services
     // const driverRepository = new DriverRepositoryMemory();
     // const passengerRepository = new PassengerRepositoryMemory();
@@ -43,9 +61,8 @@ test.skip("Deve fazer o fluxo completo de uma corrida", async function () {
     const transactionRepository = new TransactionRepositoryMemory();
     const stripeGateway = new StripeGatewayAdapterMemory();
     const mailer = new MailerServiceAdapterMemory();
-
     // event handlers
-    const driverAcceptHandler = new DriverAcceptHandler(mailer, mailerRepository);
+    const driverAcceptHandler = new DriverAcceptHandler(jobController, mailerRepository);
     const raceAppliedHandler = new RaceAppliedHandler(
         stripeGateway,
         transactionRepository,
@@ -105,14 +122,6 @@ test.skip("Deve fazer o fluxo completo de uma corrida", async function () {
     expect(output.ticket).toBe("2023000001");
     expect(driver_update.getDriver()).toBeTruthy();
 
-    expect(mailer.messages).toEqual(
-        expect.arrayContaining([
-            expect.objectContaining({
-                message:
-                    "Ola sua corrida foi aceita com secusse pelo motorista John Doe, esta a caminho..., PLACA DE CARRO: AAA-1234",
-            }),
-        ])
-    );
     // should finish a race
 
     const finishRace = new FinishRaceUsecase(raceRepository);
@@ -139,4 +148,5 @@ afterAll(async () => {
     await raceRepository.close();
     await routeRepository.close();
     await mailerRepository.close();
+    RedisConnection.disconnect();
 });

@@ -4,7 +4,7 @@ import { IQueue } from "@/application/interfaces/IQueue";
 import { Job } from "@/application/interfaces/Job";
 
 export class QueueBackgroundJobController implements IQueueBackgroundJobController {
-    static instance: QueueBackgroundJobController;
+    private static instance: QueueBackgroundJobController;
     jobs: Job[] = [];
 
     private constructor(readonly connection: any, readonly queue: IQueue) {

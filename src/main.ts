@@ -1,33 +1,29 @@
+import "dotenv/config";
 import express from "express";
-import { Mediator } from "./infra/mediator/Mediator";
+import IORedis from "ioredis";
 import { DriverAcceptHandler } from "./application/handler/DriverAcceptHandler";
 import { RaceAppliedHandler } from "./application/handler/RaceAppliedHandler";
-import { MailerRepositoryDatabase } from "./infra/repository/database/MailerRepositoryDatabase";
-import { CalculateRaceUsecase } from "./application/usecase/CalculateRaceUsecase";
 import { CreateDriverUsecase } from "./application/usecase/CreateDriverUsecase";
-import { DriverRepositoryDatabase } from "./infra/repository/database/DriverRepositoryDatabase";
+import { CalculateRaceUsecase } from "./application/usecase/CalculateRaceUsecase";
 import { GetDriverUsecase } from "./application/usecase/GetDriverUsecase";
 import { CreatePassengerUsecase } from "./application/usecase/CreatePassengerUsecase";
-import { PassengerRepositoryDatabase } from "./infra/repository/database/PassengerRepositoryDatabase";
 import { FinishRaceUsecase } from "./application/usecase/FinishRaceUsecase";
-import { RaceRepositoryDatabase } from "./infra/repository/database/RaceRepositoryDatabase";
 import { SubmitRaceUsecase } from "./application/usecase/SubmitRaceUsecase";
+import { MailerRepositoryDatabase } from "./infra/repository/database/MailerRepositoryDatabase";
+import { DriverRepositoryDatabase } from "./infra/repository/database/DriverRepositoryDatabase";
+import { PassengerRepositoryDatabase } from "./infra/repository/database/PassengerRepositoryDatabase";
+import { RaceRepositoryDatabase } from "./infra/repository/database/RaceRepositoryDatabase";
 import { RoutesRepositoryDatabase } from "./infra/repository/database/RouteRepositoryDatabase";
 import { TransactionRepositoryMemory } from "./infra/repository/TransactionRepositoryMemory";
-import { MailerServiceAdapterMemory } from "./infra/services/MailerServiceAdapterMemory";
 import { StripeGatewayAdapterMemory } from "./infra/services/StripeGatewayAdapterMemory";
+import { Mediator } from "./infra/mediator/Mediator";
+
+import { DriverAcceptUsecase } from "./application/usecase/DriverAcceptUsecase";
+import { queueBackgroundJob } from "./QueueBull";
 
 const app = express();
 
 app.use(express.json());
-
-// const driverAcceptHandler = new DriverAcceptHandler(mailer, mailerRepository);
-// const raceAppliedHandler = new RaceAppliedHandler(
-//     stripeGateway,
-//     transactionRepository,
-//     raceRepository,
-//     passengerRepository
-// );
 
 const raceRepository = new RaceRepositoryDatabase();
 const routesRepository = new RoutesRepositoryDatabase();
@@ -37,9 +33,8 @@ const passengerRepository = new PassengerRepositoryDatabase();
 
 const transactionRepository = new TransactionRepositoryMemory();
 const stripeGateway = new StripeGatewayAdapterMemory();
-const mailer = new MailerServiceAdapterMemory();
 
-const driverAcceptHandler = new DriverAcceptHandler(mailer, mailerRepository);
+const driverAcceptHandler = new DriverAcceptHandler(queueBackgroundJob, mailerRepository);
 const raceAppliedHandler = new RaceAppliedHandler(
     stripeGateway,
     transactionRepository,
@@ -51,6 +46,8 @@ const mediator = new Mediator();
 
 mediator.register(raceAppliedHandler);
 mediator.register(driverAcceptHandler);
+
+///
 
 app.post("/calculate-race", async (req, res) => {
     const calculateRace = new CalculateRaceUsecase();
@@ -78,6 +75,12 @@ app.post("/create-passenger", async (req, res) => {
     return res.send();
 });
 
+app.post("/create-driver", async (req, res) => {
+    const createDriver = new CreateDriverUsecase(driverRepository);
+    await createDriver.execute(req.body);
+    return res.send();
+});
+
 app.post("/finished-race", async (req, res) => {
     const createDriver = new FinishRaceUsecase(raceRepository);
 
@@ -86,11 +89,18 @@ app.post("/finished-race", async (req, res) => {
 });
 
 app.post("/submit-race", async (req, res) => {
-    const createRace = new SubmitRaceUsecase(raceRepository, passengerRepository, routesRepository, mediator);
+    const submitRace = new SubmitRaceUsecase(raceRepository, passengerRepository, routesRepository, mediator);
 
-    await createRace.execute(req.body);
+    await submitRace.execute(req.body);
 
     return res.send();
+});
+
+app.post("/driver-accept", async (req, res) => {
+    const driverAccept = new DriverAcceptUsecase(raceRepository, driverRepository, mediator);
+    const output = await driverAccept.execute(req.body);
+
+    return res.json(output);
 });
 
 app.listen(3333, () => console.log("Server is running!"));

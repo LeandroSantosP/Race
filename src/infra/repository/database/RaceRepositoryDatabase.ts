@@ -107,7 +107,8 @@ export class RaceRepositoryDatabase implements IRaceRepository {
 
     async getSequence(): Promise<number> {
         const countResult: Array<{ count: number }> = await this.connection("race").count();
-        return countResult[0].count + 1;
+
+        return Number(countResult[0].count) + 1;
     }
     private async getPassengerAndDriverIds(race: Race) {
         let passenger_id: null | string = null;
@@ -134,7 +135,6 @@ export class RaceRepositoryDatabase implements IRaceRepository {
             status: race.status,
             raceFinished: race.raceFinished,
             price: race.getPrice(),
-            ticket: race.getTicket(),
         });
     }
 
