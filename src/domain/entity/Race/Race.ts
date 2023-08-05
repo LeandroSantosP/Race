@@ -33,11 +33,13 @@ export class Race {
     }
 
     setStatus(status: string) {
-        if (status === "approved") {
-            this.status = "approved";
-        } else {
+        if (status === "waiting_driver") {
+            this.status = "waiting_driver";
+        } else if (status === "rejected") {
             this.status = "rejected";
         }
+
+        throw new Error("Invalid Status");
     }
 
     getPrice(): number {

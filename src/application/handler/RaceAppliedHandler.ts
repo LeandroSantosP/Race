@@ -36,8 +36,7 @@ export class RaceAppliedHandler implements IHandler {
         const passenger = await this.passengerRepository.getByEmail(event.passengerEmail);
 
         await this.transactionRepository.save(transaction);
-
-        race.setStatus(transaction.status);
+        race.setStatus("waiting_driver");
         race.matchPassenger(passenger);
 
         await this.raceRepository.update(race);

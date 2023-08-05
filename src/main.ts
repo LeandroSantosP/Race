@@ -1,6 +1,5 @@
 import "dotenv/config";
 import express from "express";
-import IORedis from "ioredis";
 import { DriverAcceptHandler } from "./application/handler/DriverAcceptHandler";
 import { RaceAppliedHandler } from "./application/handler/RaceAppliedHandler";
 import { CreateDriverUsecase } from "./application/usecase/CreateDriverUsecase";

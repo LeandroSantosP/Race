@@ -16,8 +16,14 @@ test("Deve criar uma corrida", function () {
 test("deve ser possível aprovar/rejeitar uma corrida", async function () {
     const router = Race.create(1);
     expect(router.status).toBe("waiting");
-    router.setStatus("approved");
-    expect(router.status).toBe("approved");
+    router.setStatus("waiting_driver");
+    expect(router.status).toBe("waiting_driver");
+});
+
+test("deve lançar um erro casso o status seja invalido!", async function () {
+    const router = Race.create(1);
+    expect(router.status).toBe("waiting");
+    expect(() => router.setStatus("invalid_status")).toThrow(new Error("Invalid Status"));
 });
 
 test("Um passageiro e um motorista deve aceitar uma corrida", async function () {
