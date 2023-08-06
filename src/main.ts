@@ -13,12 +13,12 @@ import { DriverRepositoryDatabase } from "./infra/repository/database/DriverRepo
 import { PassengerRepositoryDatabase } from "./infra/repository/database/PassengerRepositoryDatabase";
 import { RaceRepositoryDatabase } from "./infra/repository/database/RaceRepositoryDatabase";
 import { RoutesRepositoryDatabase } from "./infra/repository/database/RouteRepositoryDatabase";
-import { TransactionRepositoryMemory } from "./infra/repository/memory/TransactionRepositoryMemory";
 import { StripeGatewayAdapterMemory } from "./infra/services/StripeGatewayAdapterMemory";
 import { Mediator } from "./infra/mediator/Mediator";
 
 import { DriverAcceptUsecase } from "./application/usecase/DriverAcceptUsecase";
 import { queueBackgroundJob } from "./QueueBull";
+import { TransactionDatabaseRepository } from "./infra/repository/database/TransactionDatabaseRepository";
 
 const app = express();
 
@@ -30,7 +30,7 @@ const driverRepository = new DriverRepositoryDatabase();
 const mailerRepository = new MailerRepositoryDatabase();
 const passengerRepository = new PassengerRepositoryDatabase();
 
-const transactionRepository = new TransactionRepositoryMemory();
+const transactionRepository = new TransactionDatabaseRepository();
 const stripeGateway = new StripeGatewayAdapterMemory();
 
 const driverAcceptHandler = new DriverAcceptHandler(queueBackgroundJob, mailerRepository);

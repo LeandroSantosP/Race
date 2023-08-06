@@ -9,7 +9,7 @@ export class StripeGatewayAdapterMemory implements IGatewayPayment {
     }): Promise<{ tid: string; status: string }> {
         return {
             status: "approved",
-            tid: "123456789",
+            tid: "68a68ee3-6d31-4401-ba67-d5ffa89c6ebb",
         };
     }
 }
