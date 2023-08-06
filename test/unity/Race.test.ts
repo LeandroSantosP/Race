@@ -34,16 +34,16 @@ test("Um passageiro e um motorista deve aceitar uma corrida", async function () 
     race.matchPassenger(matchPassengerInput);
     race.matchDriver(matchDriverInput);
 
-    race.setStatus("approved");
+    race.setStatus("waiting_driver");
 
     const passenger = race.getPassenger();
     const driver = race.getDriver();
 
     expect(passenger?.cpf).toBe("78361717102");
-    expect(passenger?.status).toBe("approved");
+    expect(passenger?.status).toBe("waiting_driver");
     expect(driver).not.toBeNull();
     expect(driver?.cpf).toBe("57078574273");
-    expect(driver?.status).toBe("approved");
+    expect(driver?.status).toBe("waiting_driver");
 });
 
 test("Deve validar se a corrida e no fim de semana", function () {

@@ -1,5 +1,4 @@
 import { randomUUID } from "crypto";
-import { Route } from "./Route";
 import { Ticket } from "@/domain/VO/Ticket";
 import { Passenger } from "../Passenger";
 import { Driver } from "../Driver";
@@ -31,15 +30,16 @@ export class Race {
     getTicket(): string {
         return this.ticket.getTicket();
     }
+    private IsValidStatus(status: string): boolean {
+        const availableStatus = ["waiting_driver", "rejected", "waiting"];
+        return !!availableStatus.includes(status);
+    }
 
     setStatus(status: string) {
-        if (status === "waiting_driver") {
-            this.status = "waiting_driver";
-        } else if (status === "rejected") {
-            this.status = "rejected";
+        if (!this.IsValidStatus(status)) {
+            throw new Error("Invalid Status");
         }
-
-        throw new Error("Invalid Status");
+        this.status = status;
     }
 
     getPrice(): number {

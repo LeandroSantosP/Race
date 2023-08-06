@@ -13,7 +13,7 @@ import { DriverRepositoryDatabase } from "./infra/repository/database/DriverRepo
 import { PassengerRepositoryDatabase } from "./infra/repository/database/PassengerRepositoryDatabase";
 import { RaceRepositoryDatabase } from "./infra/repository/database/RaceRepositoryDatabase";
 import { RoutesRepositoryDatabase } from "./infra/repository/database/RouteRepositoryDatabase";
-import { TransactionRepositoryMemory } from "./infra/repository/TransactionRepositoryMemory";
+import { TransactionRepositoryMemory } from "./infra/repository/memory/TransactionRepositoryMemory";
 import { StripeGatewayAdapterMemory } from "./infra/services/StripeGatewayAdapterMemory";
 import { Mediator } from "./infra/mediator/Mediator";
 

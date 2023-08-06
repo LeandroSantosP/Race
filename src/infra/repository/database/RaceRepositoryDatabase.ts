@@ -99,6 +99,7 @@ export class RaceRepositoryDatabase implements IRaceRepository {
                 )
             );
         }
+
         race.setStatus(raceData.status);
         race.raceFinished = raceData.raceFinished;
 

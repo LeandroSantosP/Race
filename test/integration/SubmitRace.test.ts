@@ -8,12 +8,12 @@ import cleaner from "knex-cleaner";
 import IORedis from "ioredis";
 import { randomUUID } from "crypto";
 
-import { PassengerRepositoryMemory } from "@/infra/repository/PassengerRepositoryMemory";
+import { PassengerRepositoryMemory } from "@/infra/repository/memory/PassengerRepositoryMemory";
 import { DriverRepositoryMemory } from "@/infra/repository/memory/DriverRepositoryMemory";
-import { RaceRepositoryMemory } from "@/infra/repository/RaceRepositoryMemory,";
+import { RaceRepositoryMemory } from "@/infra/repository/memory/RaceRepositoryMemory";
 import { RoutesRepositoryMemory } from "@/infra/repository/memory/RoutesRepositoryMemory";
 
-import { TransactionRepositoryMemory } from "@/infra/repository/TransactionRepositoryMemory";
+import { TransactionRepositoryMemory } from "@/infra/repository/memory/TransactionRepositoryMemory";
 import { MailerServiceAdapterMemory } from "@/infra/services/MailerServiceAdapterMemory";
 import { StripeGatewayAdapterMemory } from "@/infra/services/StripeGatewayAdapterMemory";
 import { Driver } from "@/domain/entity/Driver";

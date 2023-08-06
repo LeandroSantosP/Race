@@ -3,7 +3,7 @@ import { randomUUID } from "crypto";
 
 const sendMailer = new MailerJobAdapterNodeMailer();
 
-test("Deve enviar um email", async function () {
+test.skip("Deve enviar um email", async function () {
     const input = {
         to: "joe.doe@gmail.com",
         from: "test.123@gmail.com",

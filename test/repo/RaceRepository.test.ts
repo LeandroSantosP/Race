@@ -32,14 +32,14 @@ test("Deve ser possível atualizar uma corrida", async function () {
     await repo.save(race);
 
     race.fishedRace(new Date("2023-06-21"));
-    race.setStatus("approved");
+    race.setStatus("waiting_driver");
 
     await repo.update(race);
 
     const output = await repo.get(race.id);
 
     expect(output.raceFinished).toBeTruthy();
-    expect(output.status).toBe("approved");
+    expect(output.status).toBe("waiting_driver");
 });
 
 test("Deve Obter uma race", async function () {});

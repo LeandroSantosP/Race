@@ -1,6 +1,5 @@
 import { CreatePassengerUsecase } from "@/application/usecase/CreatePassengerUsecase";
 import { knex_connection } from "@/database/knex";
-import { PassengerRepositoryMemory } from "@/infra/repository/PassengerRepositoryMemory";
 import { PassengerRepositoryDatabase } from "@/infra/repository/database/PassengerRepositoryDatabase";
 import cleaner from "knex-cleaner";
 
