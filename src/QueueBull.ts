@@ -14,7 +14,7 @@ const connection = new IORedis(RedisConfig.port, RedisConfig.host!, {
 
 const bullmqAdapter = new BullMqAdapter(connection);
 
-export const queueBackgroundJob = QueueBackgroundJobController.getInstance(connection, bullmqAdapter);
+export const queueBackgroundJob = QueueBackgroundJobController.getInstance(connection);
 
-queueBackgroundJob.jobs.push(new MailerJobAdapterNodeMailer());
+queueBackgroundJob.jobs.push(new MailerJobAdapterNodeMailer(bullmqAdapter));
 queueBackgroundJob.process();

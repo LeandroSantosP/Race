@@ -17,8 +17,10 @@ import { StripeGatewayAdapterMemory } from "./infra/services/StripeGatewayAdapte
 import { Mediator } from "./infra/mediator/Mediator";
 
 import { DriverAcceptUsecase } from "./application/usecase/DriverAcceptUsecase";
-import { queueBackgroundJob } from "./QueueBull";
 import { TransactionDatabaseRepository } from "./infra/repository/database/TransactionDatabaseRepository";
+import { queueBackgroundJob } from "./QueueBull";
+import { createBullBoard } from "bull-board";
+import { BullMQAdapter } from "bull-board/bullMQAdapter";
 
 const app = express();
 
@@ -46,7 +48,20 @@ const mediator = new Mediator();
 mediator.register(raceAppliedHandler);
 mediator.register(driverAcceptHandler);
 
+const queueRegister = queueBackgroundJob.jobs.map((job) => new BullMQAdapter(job.queue, { readOnlyMode: true }));
+
+const { router } = createBullBoard(queueRegister);
+
 ///
+
+app.use(
+    "/queues",
+    (req, res, next) => {
+        "/queues";
+        next();
+    },
+    router
+);
 
 app.post("/calculate-race", async (req, res) => {
     const calculateRace = new CalculateRaceUsecase();
@@ -102,4 +117,4 @@ app.post("/driver-accept", async (req, res) => {
     return res.json(output);
 });
 
-app.listen(3333, () => console.log("Server is running!"));
+app.listen(3001, () => console.log("Server is running!"));

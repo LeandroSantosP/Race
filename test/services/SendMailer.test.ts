@@ -1,7 +1,12 @@
+import { IQueue } from "@/application/interfaces/IQueue";
 import { MailerJobAdapterNodeMailer } from "@/infra/jobs/MailerJobAdapterNodeMailer";
 import { randomUUID } from "crypto";
 
-const sendMailer = new MailerJobAdapterNodeMailer();
+const mockQueue: IQueue = {
+    createQueue(queueName: string) {},
+};
+
+const sendMailer = new MailerJobAdapterNodeMailer(mockQueue);
 
 test.skip("Deve enviar um email", async function () {
     const input = {

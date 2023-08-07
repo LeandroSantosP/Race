@@ -7,13 +7,13 @@ export class QueueBackgroundJobController implements IQueueBackgroundJobControll
     private static instance: QueueBackgroundJobController;
     jobs: Job[] = [];
 
-    private constructor(readonly connection: any, readonly queue: IQueue) {
+    private constructor(readonly connection: any) {
         this.connection = connection;
     }
 
-    static getInstance(RedisConnection: any, queue: IQueue): QueueBackgroundJobController {
+    static getInstance(RedisConnection: any): QueueBackgroundJobController {
         if (!QueueBackgroundJobController.instance) {
-            QueueBackgroundJobController.instance = new QueueBackgroundJobController(RedisConnection, queue);
+            QueueBackgroundJobController.instance = new QueueBackgroundJobController(RedisConnection);
         }
 
         return this.instance;
@@ -22,7 +22,7 @@ export class QueueBackgroundJobController implements IQueueBackgroundJobControll
     async publishOnQueue(name: string, data: any) {
         const job = this.jobs.find((job) => job.name === name);
         if (!job) throw new Error("Job not found");
-        const Queue = this.queue.createQueue(job.name);
+        const Queue = job.queue;
         return await Queue.add(name, data);
     }
 

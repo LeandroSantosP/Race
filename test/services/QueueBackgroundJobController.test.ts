@@ -12,9 +12,9 @@ const connection = new IORedis(RedisConfig.port, RedisConfig.host!, {
 
 const bullmqAdapter = new BullMqAdapter(connection);
 
-const queueBackgroundJob = QueueBackgroundJobController.getInstance(connection, bullmqAdapter);
+const queueBackgroundJob = QueueBackgroundJobController.getInstance(connection);
 test("Deve ser possível criar uma Fila de jobs.", async function () {
-    queueBackgroundJob.jobs.push(new JobLogTesting());
+    queueBackgroundJob.jobs.push(new JobLogTesting(bullmqAdapter));
 
     await queueBackgroundJob.publishOnQueue("LogJob", { test: "test" });
     queueBackgroundJob.process();

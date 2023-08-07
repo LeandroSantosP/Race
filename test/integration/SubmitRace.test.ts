@@ -44,8 +44,8 @@ const RedisConnection = new IORedis(RedisConfig.port, RedisConfig.host!, {
 });
 
 const bullmqAdapter = new BullMqAdapter(RedisConnection);
-const jobController = QueueBackgroundJobController.getInstance(RedisConnection, bullmqAdapter);
-jobController.jobs.push(new MailerJobAdapterNodeMailer());
+const jobController = QueueBackgroundJobController.getInstance(RedisConnection);
+jobController.jobs.push(new MailerJobAdapterNodeMailer(bullmqAdapter));
 
 beforeEach(async () => {
     await cleaner.clean(knex_connection);
