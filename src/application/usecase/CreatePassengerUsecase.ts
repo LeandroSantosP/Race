@@ -1,7 +1,8 @@
 import { Passenger } from "@/domain/entity/Passenger";
 import { IPassengerRepository } from "../repository/IPassengerRepository";
+import { Application } from "../interfaces/Application";
 
-export class CreatePassengerUsecase {
+export class CreatePassengerUsecase implements Application {
     constructor(private readonly passengerRepository: IPassengerRepository) {}
 
     async execute(input: Input): Promise<void> {

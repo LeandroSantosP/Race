@@ -1,6 +1,7 @@
+import { Application } from "../interfaces/Application";
 import { IDriverRepository } from "../repository/IDriverRepository";
 
-export class GetDriverUsecase {
+export class GetDriverUsecase implements Application {
     constructor(private readonly driverRepository: IDriverRepository) {}
 
     async execute(cpf: string): Promise<Output> {

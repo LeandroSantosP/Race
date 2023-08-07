@@ -6,8 +6,9 @@ import { IMediator } from "@/infra/mediator/IMediator";
 import { RaceAppliedEvent } from "@/domain/event/RaceAppliedEvent";
 import { CalculateRacePrice } from "@/domain/services/CalculateRacePrice";
 import { IRoutesRepository } from "../repository/IRoutesRepository";
+import { Application } from "../interfaces/Application";
 
-export class SubmitRaceUsecase {
+export class SubmitRaceUsecase implements Application {
     constructor(
         private readonly raceRepository: IRaceRepository,
         private readonly passengerRepository: IPassengerRepository,

@@ -2,8 +2,9 @@ import { IMediator } from "@/infra/mediator/IMediator";
 import { IDriverRepository } from "../repository/IDriverRepository";
 import { IRaceRepository } from "../repository/IRaceRepository";
 import { DriverAcceptEvent } from "@/domain/event/DriverAcceptEvent";
+import { Application } from "../interfaces/Application";
 
-export class DriverAcceptUsecase {
+export class DriverAcceptUsecase implements Application {
     constructor(
         private readonly raceRepository: IRaceRepository,
         private readonly driverRepository: IDriverRepository,

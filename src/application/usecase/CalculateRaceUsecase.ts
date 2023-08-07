@@ -1,7 +1,8 @@
 import { Route } from "@/domain/entity/Race/Route";
 import { CalculateRacePrice } from "@/domain/services/CalculateRacePrice";
+import { Application } from "../interfaces/Application";
 
-export class CalculateRaceUsecase {
+export class CalculateRaceUsecase implements Application {
     constructor() {}
 
     async execute(input: Input): Promise<Output> {

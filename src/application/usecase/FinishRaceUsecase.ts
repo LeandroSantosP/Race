@@ -1,6 +1,7 @@
+import { Application } from "../interfaces/Application";
 import { IRaceRepository } from "../repository/IRaceRepository";
 
-export class FinishRaceUsecase {
+export class FinishRaceUsecase implements Application {
     constructor(private readonly raceRepository: IRaceRepository) {}
 
     async execute(input: Input): Promise<Output> {

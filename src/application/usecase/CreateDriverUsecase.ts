@@ -1,7 +1,8 @@
 import { Driver } from "@/domain/entity/Driver";
 import { IDriverRepository } from "../repository/IDriverRepository";
+import { Application } from "../interfaces/Application";
 
-export class CreateDriverUsecase {
+export class CreateDriverUsecase implements Application {
     constructor(private readonly DriverRepository: IDriverRepository) {}
 
     async execute(input: Input): Promise<void> {

@@ -16,10 +16,14 @@ export class Email {
 export class Passenger extends User {
     email: Email;
     password: Password;
+
     private constructor(id: string, passengerName: string, email: Email, password: Password, age: Age, cpf: Cpf) {
         super(id, passengerName, age, cpf);
         this.email = email;
         this.password = password;
+    }
+    getParams() {
+        throw new Error("Method not implemented.");
     }
 
     static async create(

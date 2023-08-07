@@ -1,4 +1,4 @@
-import { Passenger } from "@/domain/entity/Passenger";
+import Passenger from "@/domain/entity/Passenger";
 
 export interface IPassengerRepository {
     save(passenger: Passenger): Promise<void>;
