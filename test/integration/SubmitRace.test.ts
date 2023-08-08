@@ -47,6 +47,8 @@ const bullmqAdapter = new BullMqAdapter(RedisConnection);
 const jobController = QueueBackgroundJobController.getInstance(RedisConnection);
 jobController.jobs.push(new MailerJobAdapterNodeMailer(bullmqAdapter));
 
+jobController.process();
+
 beforeEach(async () => {
     await cleaner.clean(knex_connection);
 });
@@ -148,5 +150,4 @@ afterAll(async () => {
     await raceRepository.close();
     await routeRepository.close();
     await mailerRepository.close();
-    RedisConnection.disconnect();
 });

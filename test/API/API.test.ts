@@ -1,13 +1,13 @@
 import { knex_connection } from "@/database/knex";
 import axios from "axios";
-const base_URL = "http://localhost:3333";
+const base_URL = "http://localhost:3001";
 import cleaner from "knex-cleaner";
 
 beforeEach(async () => {
     await cleaner.clean(knex_connection);
 });
 
-describe.skip("Testing api", () => {
+describe("Testing api", () => {
     test("Deve Testar a api - (Calculate Race)", async function () {
         const input = {
             routes_drives: [

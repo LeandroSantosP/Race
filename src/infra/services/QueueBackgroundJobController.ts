@@ -1,7 +1,7 @@
-import { Worker } from "bullmq";
 import { IQueueBackgroundJobController } from "@/application/interfaces/IQueueBackgroundJobController";
-import { IQueue } from "@/application/interfaces/IQueue";
 import { Job } from "@/application/interfaces/Job";
+
+import { Worker } from "bullmq";
 
 export class QueueBackgroundJobController implements IQueueBackgroundJobController {
     private static instance: QueueBackgroundJobController;
@@ -19,19 +19,21 @@ export class QueueBackgroundJobController implements IQueueBackgroundJobControll
         return this.instance;
     }
 
-    async publishOnQueue(name: string, data: any) {
+    async publishOnQueue<Data>(name: string, data: Data) {
         const job = this.jobs.find((job) => job.name === name);
         if (!job) throw new Error("Job not found");
+
         const Queue = job.queue;
+
         return await Queue.add(name, data);
     }
 
-    process(): void {
+    process() {
         for (const job of this.jobs) {
             new Worker(
                 job.name,
-                async (jobData) => {
-                    return job.handle(jobData.data);
+                async (context) => {
+                    await job.handle(context.data);
                 },
                 { connection: this.connection }
             );

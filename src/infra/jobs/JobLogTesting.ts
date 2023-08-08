@@ -5,7 +5,7 @@ export class JobLogTesting implements Job {
     queue: any;
     name = "LogJob";
 
-    constructor(queue: IQueue) {
+    constructor(queue: IQueue<any, any>) {
         this.queue = queue.createQueue(this.name);
     }
 
