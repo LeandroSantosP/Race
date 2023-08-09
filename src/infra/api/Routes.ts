@@ -11,7 +11,6 @@ import { FinishRaceUsecase } from "@/application/usecase/FinishRaceUsecase";
 import { GetDriverUsecase } from "@/application/usecase/GetDriverUsecase";
 import { SubmitRaceUsecase } from "@/application/usecase/SubmitRaceUsecase";
 import { Mediator } from "../mediator/Mediator";
-import { DriverRepositoryDatabase } from "../repository/database/DriverRepositoryDatabase";
 import { MailerRepositoryDatabase } from "../repository/database/MailerRepositoryDatabase";
 import { PassengerRepositoryDatabase } from "../repository/database/PassengerRepositoryDatabase";
 import { RaceRepositoryDatabase } from "../repository/database/RaceRepositoryDatabase";
@@ -22,7 +21,6 @@ import { HttpServer } from "./HttpServer";
 
 const raceRepository = new RaceRepositoryDatabase();
 const routesRepository = new RoutesRepositoryDatabase();
-const driverRepository = new DriverRepositoryDatabase();
 const mailerRepository = new MailerRepositoryDatabase();
 const passengerRepository = new PassengerRepositoryDatabase();
 
@@ -46,19 +44,22 @@ const queueRegister = queueBackgroundJob.jobs.map((job) => new BullMQAdapter(job
 
 const { router } = createBullBoard(queueRegister);
 
-///
-
 export class Routes {
+    private dependencies: { [key: string]: any };
     constructor(readonly httpServer: HttpServer) {
+        this.dependencies = {};
         this.loadRoutes();
     }
 
-    loadRoutes() {
+    register(dependencyName: string, dependency: any) {
+        this.dependencies[dependencyName] = dependency;
+    }
+
+    private loadRoutes() {
         this.httpServer.on(
             "use",
             "/queues",
-            (params: any, body: any, next: Function, router: any) => {
-                "/queues";
+            (params: any, body: any, next: Function) => {
                 next();
             },
             router
@@ -72,11 +73,13 @@ export class Routes {
         });
 
         this.httpServer.on("post", "/create-driver", async (params: any, body: any) => {
+            const driverRepository = this.dependencies["driverRepository"];
             const createDriver = new CreateDriverUsecase(driverRepository);
             await createDriver.execute(body);
         });
 
         this.httpServer.on("get", "/driver-by-cpf/:cpf", async (params: any, body: any) => {
+            const driverRepository = this.dependencies["driverRepository"];
             const getDriver = new GetDriverUsecase(driverRepository);
             const output = await getDriver.execute(params.cpf);
             return output;
@@ -89,6 +92,7 @@ export class Routes {
         });
 
         this.httpServer.on("post", "/create-driver", async (params: any, body: any) => {
+            const driverRepository = this.dependencies["driverRepository"];
             const createDriver = new CreateDriverUsecase(driverRepository);
             await createDriver.execute(body);
             return;
@@ -110,6 +114,7 @@ export class Routes {
         });
 
         this.httpServer.on("post", "/driver-accept", async (params: any, body: any) => {
+            const driverRepository = this.dependencies["driverRepository"];
             const driverAccept = new DriverAcceptUsecase(raceRepository, driverRepository, mediator);
             const output = await driverAccept.execute(body);
 
