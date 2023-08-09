@@ -1,6 +1,6 @@
 import { Application } from "../interfaces/Application";
 
-export class LodDecorator {
+export class LodDecorator implements Application {
     constructor(private readonly usecase: Application) {}
 
     async execute(input: any): Promise<any> {

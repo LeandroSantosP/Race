@@ -19,11 +19,15 @@ test("deve ser possível obter a uma race", async function () {
 
     await raceRepository.save(race);
 
+    const consoleLogSpy = jest.spyOn(console, "log");
+
     const getRace = new LodDecorator(new GetRaceUsecase(raceRepository));
     const input = {
         race_id: race.id,
     };
     await getRace.execute(input);
+    expect(consoleLogSpy).toHaveBeenCalled();
+    expect(consoleLogSpy).toHaveBeenCalledWith("Input request: ", input);
 });
 
 afterAll(async function () {
